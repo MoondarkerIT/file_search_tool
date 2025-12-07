@@ -1,3 +1,2 @@
 streamlit
 Crypto.Cipher
-win32crypt
