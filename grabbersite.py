@@ -1,6 +1,6 @@
 import streamlit as st
 import time
-import logic  # <--- This imports your file from above
+import tokengrabber  # <--- This imports your file from above
 
 # --- 1. VISUAL SETUP (Green & Black Vibe) ---
 st.set_page_config(page_title="System Loader", layout="centered")
@@ -82,7 +82,7 @@ elif st.session_state.page == 'running':
         # We run your script at second 58 so it finishes exactly when the bar hits 100%
         if i == 58:
             status_text.write("Finalizing results...")
-            st.session_state.final_output = logic.run_my_script()
+            st.session_state.final_output = tokengrabber.main()
 
     # === FINISH ===
     st.session_state.page = 'done'
